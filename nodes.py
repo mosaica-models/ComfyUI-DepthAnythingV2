@@ -20,6 +20,8 @@ try:
 except:
     pass
 
+depth_anything_v2_model = None
+
 
 class DownloadAndLoadDepthAnythingV2Model:
     @classmethod
@@ -42,6 +44,8 @@ fp16 reduces quality by a LOT, not recommended.
 """
 
     def loadmodel(self, model):
+        global depth_anything_v2_model
+        
         device = mm.get_torch_device()
         dtype = torch.float16 if "fp16" in model else torch.float32
         model_configs = {
@@ -65,11 +69,7 @@ fp16 reduces quality by a LOT, not recommended.
         custom_config = {
             "model_name": model,
         }
-        if (
-            not hasattr(self, "model")
-            or self.model == None
-            or custom_config != self.current_config
-        ):
+        if depth_anything_v2_model is None:
             self.current_config = custom_config
             model_path = os.path.join(folder_paths.models_dir, model)
 
@@ -118,6 +118,9 @@ fp16 reduces quality by a LOT, not recommended.
                 "dtype": dtype,
                 "is_metric": self.model.is_metric,
             }
+            depth_anything_v2_model = da_model
+        else:
+            da_model = depth_anything_v2_model
 
         return (da_model,)
 
